@@ -6,6 +6,8 @@ import time
 from config import Config
 from channel_form import ChannelForm
 
+from selenium.webdriver.common.by import By
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -21,21 +23,45 @@ def index():
         options.add_argument('disable-infobars')
         # options.add_argument('headless')
 
-        driver = webdriver.Chrome(chrome_options=options)
+        driver = webdriver.Chrome()
 
         driver.get(url)
 
-        for _ in range(20):
-            driver.execute_script("window.scrollTo(0,1080)")
-            time.sleep(0.5)
+        # for _ in range(20):
+        #     driver.execute_script("window.scrollTo(0,1080)")
+        #     time.sleep(0.5)
 
-        content = driver.page_source.encode('utf-8').strip()
-        soup = BeautifulSoup(content, 'lxml')
+        last_height = driver.execute_script("return document.documentElement.scrollHeight")
+        target_count = 20
 
-        img_tags = soup.find_all('img', class_='yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded',limit=20)
-        # image_sources = [ tag['src'] for tag in img_tags ]
-        for tag in img_tags:
-            image_sources.append(tag['src'])
+        while target_count > len(image_sources):
+            print('BEGIN WHILE LOOP')
+            driver.execute_script('window.scrollTo(0, document.documentElement.scrollHeight);')
+
+            time.sleep(1)
+
+            new_height = driver.execute_script("return document.documentElement.scrollHeight")
+
+            print(new_height, last_height)
+
+            if new_height == last_height:
+                break
+
+            last_height = new_height
+
+            # TODO figure out correct selenium query to get img tags
+            img_tags = driver.find_elements(By.CLASS_NAME, "yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded")
+
+            print('TAGS', img_tags)
+            for tag in img_tags:
+                image_sources.append(tag['src'])
+
+        # content = driver.page_source.encode('utf-8').strip()
+        # soup = BeautifulSoup(content, 'lxml')
+
+        # img_tags = soup.find_all('img', class_='yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded',limit=20)
+        # for tag in img_tags:
+        #     image_sources.append(tag['src'])
 
         driver.close()
 
