@@ -10,6 +10,8 @@ beautifulsoup4 = "*"
 lxml = "*"
 requests = "*"
 selenium = "*"
+jinja2 = "*"
+flask-wtf = "*"
 
 [dev-packages]
 

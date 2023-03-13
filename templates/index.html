@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youtube Thumbnail Scrapper</title>
+</head>
+<body>
+    <h1>YouTube Channel Thumbnail Image Scrapper</h1>
+    <div>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <!-- {{ form.csrf_token }} -->
+            <p>
+                {{form.channel_url(size=32)}}
+            </p>
+            <p>{{form.submit(size=32)}}</p>
+        </form>
+        <div>
+            {% for source in image_sources %}
+                <img src="{{source}}" alt="" />
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
