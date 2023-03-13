@@ -6,10 +6,47 @@ import time
 from config import Config
 from channel_form import ChannelForm
 
-from selenium.webdriver.common.by import By
+# from selenium.webdriver.common.by import By
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# function that scrapes for thumbnail images of a channel
+def scrape_youtube_channel(url):
+    image_sources = []
+
+    options = Options()
+    options.add_argument('start-maximized')
+    options.add_argument('disable-infobars')
+    # options.add_argument('headless')
+
+    driver = webdriver.Chrome()
+    driver.get(url)
+
+    last_height = driver.execute_script("return document.documentElement.scrollHeight")
+    target_count = 20
+    while target_count > len(image_sources):
+        driver.execute_script('window.scrollTo(0, document.documentElement.scrollHeight);')
+        time.sleep(1)
+        new_height = driver.execute_script("return document.documentElement.scrollHeight")
+
+        if new_height == last_height:
+            break
+
+        last_height = new_height
+        content = driver.page_source.encode('utf-8').strip()
+        soup = BeautifulSoup(content, 'lxml')
+        img_tags = soup.find_all('img', class_='yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded')
+
+        for tag in img_tags:
+            if len(image_sources) == 20:
+                break
+            image_sources.append(tag['src'])
+
+    driver.close()
+    return image_sources
+
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -18,61 +55,14 @@ def index():
     if form.validate_on_submit():
         url = form.data['channel_url']
 
-        options = Options()
-        options.add_argument('start-maximized')
-        options.add_argument('disable-infobars')
-        # options.add_argument('headless')
-
-        driver = webdriver.Chrome()
-
-        driver.get(url)
-
-        # for _ in range(20):
-        #     driver.execute_script("window.scrollTo(0,1080)")
-        #     time.sleep(0.5)
-
-        last_height = driver.execute_script("return document.documentElement.scrollHeight")
-        target_count = 20
-
-        while target_count > len(image_sources):
-            print('BEGIN WHILE LOOP')
-            driver.execute_script('window.scrollTo(0, document.documentElement.scrollHeight);')
-
-            time.sleep(1)
-
-            new_height = driver.execute_script("return document.documentElement.scrollHeight")
-
-            print(new_height, last_height)
-
-            if new_height == last_height:
-                break
-
-            last_height = new_height
-
-            # TODO figure out correct selenium query to get img tags
-            img_tags = driver.find_elements(By.CLASS_NAME, "yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded")
-
-            print('TAGS', img_tags)
-            for tag in img_tags:
-                image_sources.append(tag['src'])
-
-        # content = driver.page_source.encode('utf-8').strip()
-        # soup = BeautifulSoup(content, 'lxml')
-
-        # img_tags = soup.find_all('img', class_='yt-core-image--fill-parent-height yt-core-image--fill-parent-width yt-core-image yt-core-image--content-mode-scale-aspect-fill yt-core-image--loaded',limit=20)
-        # for tag in img_tags:
-        #     image_sources.append(tag['src'])
-
-        driver.close()
-
-
+        image_sources = scrape_youtube_channel(url)
 
     return render_template('index.html', form=form, image_sources=image_sources)
 
 
-
+# Testing route
 @app.route('/scrape')
-def scrape():
+def scrape(url):
     options = Options()
     options.add_argument('start-maximized')
     options.add_argument('disable-infobars')
@@ -80,7 +70,7 @@ def scrape():
 
     driver = webdriver.Chrome(chrome_options=options)
 
-    driver.get('https://www.youtube.com/@Houseofhighlights/videos')
+    driver.get(url)
 
     for _ in range(20):
         driver.execute_script("window.scrollTo(0,1080)")
