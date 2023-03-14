@@ -7,15 +7,15 @@
     <title>Youtube Thumbnail Scrapper</title>
 </head>
 <body>
-    <h1>YouTube Channel Thumbnail Image Scrapper</h1>
+    <h1>YouTube Channel Thumbnail Image Scraper</h1>
     <div>
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
             <!-- {{ form.csrf_token }} -->
             <p>
-                {{form.channel_url(size=32)}}
+                {{form.channel_url(size=64)}}
             </p>
-            <p>{{form.submit(size=32)}}</p>
+            <p>{{form.submit(size=64)}}</p>
         </form>
         <div>
             {% for source in image_sources %}

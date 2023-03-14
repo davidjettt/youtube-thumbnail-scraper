@@ -18,9 +18,9 @@ def scrape_youtube_channel(url):
     options = Options()
     options.add_argument('start-maximized')
     options.add_argument('disable-infobars')
-    # options.add_argument('headless')
+    options.add_argument('headless')
 
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(chrome_options=options)
     driver.get(url)
 
     last_height = driver.execute_script("return document.documentElement.scrollHeight")
@@ -45,8 +45,6 @@ def scrape_youtube_channel(url):
 
     driver.close()
     return image_sources
-
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
