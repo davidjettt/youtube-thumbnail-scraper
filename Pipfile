@@ -12,6 +12,7 @@ requests = "*"
 selenium = "*"
 jinja2 = "*"
 flask-wtf = "*"
+gunicorn = "==20.1.0"
 
 [dev-packages]
 
