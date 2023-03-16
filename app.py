@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 import time
 from config import Config
 from channel_form import ChannelForm
-
+import os
 # from selenium.webdriver.common.by import By
 
 app = Flask(__name__)
@@ -16,11 +16,14 @@ def scrape_youtube_channel(url):
     image_sources = []
 
     options = Options()
-    options.add_argument('start-maximized')
-    options.add_argument('disable-infobars')
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
     options.add_argument('headless')
+    options.add_argument('disable-dev-shm-usage')
+    options.add_argument('no-sandbox')
+    # options.add_argument('start-maximized')
+    # options.add_argument('disable-infobars')
 
-    driver = webdriver.Chrome(chrome_options=options)
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
     driver.get(url)
 
     last_height = driver.execute_script("return document.documentElement.scrollHeight")
